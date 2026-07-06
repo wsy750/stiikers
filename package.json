@@ -1,0 +1,9 @@
+{
+  "name": "jeonguk-maechul-bunseok-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "전국 매출분석시스템 - 공공데이터 프록시 서버 (Vercel Serverless Functions)",
+  "engines": {
+    "node": ">=18"
+  }
+}
