@@ -8,7 +8,7 @@
 //   SEMAS_SERVICE_KEY     : data.go.kr에서 발급한 소상공인시장진흥공단 상가업소 API 서비스키 (Decoding 키 사용)
 
 const KAKAO_GEOCODE_URL = "https://dapi.kakao.com/v2/local/search/address.json";
-const SEMAS_RADIUS_URL = "http://apis.data.go.kr/B553077/api/open/sdsc/storeListInRadius";
+const SEMAS_RADIUS_URL = "http://apis.data.go.kr/B553077/api/open/sdsc2/storeListInRadius";
 
 // 무인매장으로 분류할 키워드 (상호명 기준, 필요시 자유롭게 추가)
 const UNMANNED_KEYWORDS = [
