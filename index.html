@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>전국 매출분석시스템</title>
+<style>
+  :root {
+    --ink: #111111;
+    --gray: #6B7280;
+    --gray-light: #9CA3AF;
+    --line: #E5E7EB;
+    --bg-soft: #FAFAFA;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #fff;
+    color: var(--ink);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  header { border-bottom: 1px solid var(--line); padding: 28px 0; }
+  .eyebrow { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-light); margin-bottom: 8px; }
+  h1 { font-size: 28px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .sub { font-size: 14px; color: var(--gray); margin: 0; }
+
+.grid2 { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 28px; }
+@media (min-width: 768px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+.card { border: 1px solid var(–line); border-radius: 12px; padding: 20px; }
+.label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.region-label { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.dotA { width: 8px; height: 8px; border-radius: 50%; background: var(–ink); display: inline-block; }
+.dotB { width: 8px; height: 8px; border-radius: 50%; background: var(–gray-light); display: inline-block; }
+
+.search-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.search-box { flex: 1; display: flex; align-items: center; gap: 8px; background: var(–bg-soft); border: 1px solid var(–line); border-radius: 8px; padding: 10px 12px; }
+.search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; color: var(–ink); }
+.btn-analyze { padding: 10px 16px; border-radius: 8px; border: none; background: var(–ink); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-analyze:hover { background: #333; }
+
+.row-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.row-label { font-size: 11px; color: var(–gray-light); }
+.radius-btns { display: flex; gap: 6px; }
+.radius-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid var(–line); background: #fff; color: var(–gray); font-size: 12px; cursor: pointer; }
+.radius-btn.active { background: var(–ink); color: #fff; border-color: var(–ink); }
+
+input[type=“range”] { accent-color: var(–ink); }
+.pyeong-row { display: flex; align-items: center; gap: 8px; }
+.pyeong-val { font-size: 12px; font-weight: 600; width: 44px; text-align: right; }
+
+.status-msg { font-size: 11px; color: var(–gray-light); margin-top: 10px; }
+.status-err { font-size: 11px; color: #B91C1C; margin-top: 10px; }
+
+.info-line { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(–gray-light); margin-top: 14px; }
+
+.section { margin-top: 36px; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.section-title { font-size: 14px; font-weight: 600; }
+.section-note { font-size: 12px; color: var(–gray-light); }
+
+.metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.metric-label { font-size: 11px; color: var(–gray-light); margin-bottom: 4px; }
+.metric-value { font-size: 14px; font-weight: 600; }
+.metric-unit { font-size: 11px; color: var(–gray-light); }
+
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bar-name { font-size: 12px; width: 96px; flex-shrink: 0; color: var(–gray); }
+.bar-name.star { color: var(–ink); font-weight: 600; }
+.bar-track { flex: 1; height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; }
+.bar-count { font-size: 12px; width: 30px; text-align: right; }
+
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(–line); color: var(–gray-light); }
+.badge.high { border-color: var(–ink); color: var(–ink); }
+
+.revenue-num { font-size: 24px; font-weight: 800; margin: 4px 0; }
+.revenue-range { font-size: 12px; color: var(–gray-light); }
+
+footer { margin-top: 40px; padding: 24px 0 48px; font-size: 11px; color: var(–gray-light); border-top: 1px solid var(–line); }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">전국 매출분석시스템</div>
+    <h1>두 지역, 나란히 비교한다</h1>
+    <p class="sub">반경·업종·무인매장·예상 매출까지 한 화면에서 비교하세요 (업종·무인매장은 실제 공공데이터 기반)</p>
+  </header>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="region-label"><span class="dotA"></span> 지역 A</div>
+      <div class="search-row">
+        <div class="search-box"><input id="inputA" placeholder="예: 서울 마포구 양화로 160" /></div>
+        <button class="btn-analyze" onclick="analyze('A')">분석</button>
+      </div>
+      <div class="row-line">
+        <span class="row-label">반경</span>
+        <div class="radius-btns" id="radiusA">
+          <button class="radius-btn active" data-r="250">250m</button>
+          <button class="radius-btn" data-r="500">500m</button>
+          <button class="radius-btn" data-r="1000">1000m</button>
+        </div>
+      </div>
+      <div class="row-line">
+        <span class="row-label">매장 평수</span>
+        <div class="pyeong-row">
+          <input type="range" min="5" max="80" value="20" id="pyeongA" oninput="document.getElementById('pyeongValA').textContent = this.value + '평'">
+          <span class="pyeong-val" id="pyeongValA">20평</span>
+        </div>
+      </div>
+      <div id="statusA"></div>
+    </div>
+
+```
+<div class="card">
+  <div class="region-label"><span class="dotB"></span> 지역 B</div>
+  <div class="search-row">
+    <div class="search-box"><input id="inputB" placeholder="예: 경주 황리단길" /></div>
+    <button class="btn-analyze" onclick="analyze('B')">분석</button>
+  </div>
+  <div class="row-line">
+    <span class="row-label">반경</span>
+    <div class="radius-btns" id="radiusB">
+      <button class="radius-btn active" data-r="250">250m</button>
+      <button class="radius-btn" data-r="500">500m</button>
+      <button class="radius-btn" data-r="1000">1000m</button>
+    </div>
+  </div>
+  <div class="row-line">
+    <span class="row-label">매장 평수</span>
+    <div class="pyeong-row">
+      <input type="range" min="5" max="80" value="20" id="pyeongB" oninput="document.getElementById('pyeongValB').textContent = this.value + '평'">
+      <span class="pyeong-val" id="pyeongValB">20평</span>
+    </div>
+  </div>
+  <div id="statusB"></div>
+</div>
+```
+
+  </div>
+
+  <div class="info-line">ⓘ 업종 구성·무인매장 분석은 실제 공공데이터(상가업소 정보) 기반입니다. 유동인구·매출은 공공 API 미제공 항목으로 추정 모델을 사용합니다.</div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-title">핵심 지표</span><span class="section-note">추정 모델</span></div>
+    <div class="grid2" id="metricCards">
+      <div class="card"><div style="color:var(--gray-light);font-size:13px;">지역 A를 검색해주세요</div></div>
+      <div class="card"><div style="color:var(--gray-light);font-size:13px;">지역 B를 검색해주세요</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-title">업종 구성 분석</span><span class="section-note" id="industryNote">실제 공공데이터</span></div>
+    <div class="grid2" id="industryCards">
+      <div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>
+      <div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-title">무인매장 분석</span><span class="section-note">실제 공공데이터 · ★ 포토부스 직접 경쟁</span></div>
+    <div class="grid2" id="unmannedCards">
+      <div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>
+      <div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-title">예상 월 매출</span><span class="section-note">추정 모델</span></div>
+    <div class="grid2" id="revenueCards">
+      <div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>
+      <div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>
+    </div>
+  </div>
+
+  <footer>전국 매출분석시스템 · STiiKERS 내부 도구</footer>
+</div>
+
+<script>
+const state = { A: null, B: null, radius: { A: 250, B: 250 } };
+
+document.querySelectorAll('#radiusA .radius-btn').forEach(b => b.onclick = () => setRadius('A', b));
+document.querySelectorAll('#radiusB .radius-btn').forEach(b => b.onclick = () => setRadius('B', b));
+
+function setRadius(region, btn) {
+  document.querySelectorAll('#radius' + region + ' .radius-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.radius[region] = parseInt(btn.dataset.r, 10);
+}
+
+// ---- 추정 모델 (시드 기반 의사난수, 유동인구/연령/매출용) ----
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  return h;
+}
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function radiusFactor(r) { return Math.pow(r / 500, 2); }
+function pyeongFactor(p) { return Math.sqrt(Math.max(p, 5) / 20); }
+
+function estimateModel(address, radius, pyeong, unmannedShare) {
+  const rand = mulberry32(hashString(address));
+  const rf = radiusFactor(radius);
+  const isCampus = /대학|캠퍼스/.test(address);
+  const isStation = /역|터미널/.test(address);
+  const isTourist = /길|거리|황리단|한강|해변/.test(address);
+
+  let districtType = "주거 밀집 상권";
+  if (isCampus) districtType = "대학가 상권";
+  else if (isTourist) districtType = "관광·유동형 상권";
+  else if (isStation) districtType = "역세권 상권";
+
+  const totalDaily = Math.round((3000 + rand() * 9000) * rf);
+  const slots = ["06-09","09-12","12-15","15-18","18-21","21-24"];
+  let peakIdx = 0, peakVal = -1;
+  slots.forEach((s, i) => {
+    let base = 40 + rand() * 30;
+    if (isCampus && i >= 2 && i <= 3) base += 30;
+    if (isStation && (i === 0 || i === 4)) base += 30;
+    if (base > peakVal) { peakVal = base; peakIdx = i; }
+  });
+
+  let ageGroups = ["10대","20대","30대","40대","50대","60대+"];
+  let ageWeights;
+  if (isCampus) ageWeights = [8,42,24,12,9,5];
+  else if (isTourist) ageWeights = [6,28,27,18,13,8];
+  else if (isStation) ageWeights = [5,24,30,22,12,7];
+  else ageWeights = [7,20,24,21,16,12];
+  const ageNoise = ageWeights.map(w => Math.max(2, Math.round(w + (rand()-0.5)*8)));
+  const ageSum = ageNoise.reduce((a,b)=>a+b,0);
+  let topAgeIdx = 0, topAgeVal = -1;
+  ageNoise.forEach((v,i) => { const r = v/ageSum*100; if (r > topAgeVal) { topAgeVal = r; topAgeIdx = i; } });
+
+  const pf = pyeongFactor(pyeong);
+  const baseRevenuePerFoot = 900 + rand() * 600;
+  const industryMultiplier = 0.85 + (unmannedShare/100) * 0.6;
+  const estMid = Math.round((totalDaily/1000) * baseRevenuePerFoot * industryMultiplier * pf);
+
+  return {
+    districtType, totalDaily, peakSlot: slots[peakIdx],
+    topAgeName: ageGroups[topAgeIdx], topAgeRatio: Math.round(topAgeVal*10)/10,
+    estLow: Math.round(estMid*0.75), estMid, estHigh: Math.round(estMid*1.3),
+  };
+}
+
+async function analyze(region) {
+  const address = document.getElementById('input' + region).value.trim();
+  const statusEl = document.getElementById('status' + region);
+  if (!address) return;
+  statusEl.innerHTML = '<div class="status-msg">공공데이터 조회 중...</div>';
+
+  const radius = state.radius[region];
+  const pyeong = parseInt(document.getElementById('pyeong' + region).value, 10);
+
+  try {
+    const res = await fetch('/api/analyze?address=' + encodeURIComponent(address) + '&radius=' + radius);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || '조회 실패');
+    statusEl.innerHTML = '';
+    state[region] = { address, radius, pyeong, live: json };
+    render();
+  } catch (e) {
+    statusEl.innerHTML = '<div class="status-err">' + e.message + '</div>';
+  }
+}
+
+const COLORS = { A: '#111111', B: '#9CA3AF' };
+const UNMANNED_LABELS = ["무인사진관/포토부스","무인아이스크림","무인카페","무인세탁","무인편의점"];
+
+function render() {
+  ['A','B'].forEach(region => {
+    const s = state[region];
+    if (!s) return;
+    const unmannedShare = (s.live.industryData.find(d => d.name === '무인매장') || {}).ratio || 0;
+    const model = estimateModel(s.address, s.radius, s.pyeong, unmannedShare);
+    s.model = model;
+  });
+
+  renderMetrics();
+  renderIndustry();
+  renderUnmanned();
+  renderRevenue();
+}
+
+function renderMetrics() {
+  const el = document.getElementById('metricCards');
+  el.innerHTML = ['A','B'].map(region => {
+    const s = state[region];
+    if (!s) return '<div class="card"><div style="color:var(--gray-light);font-size:13px;">지역 ' + region + '를 검색해주세요</div></div>';
+    const m = s.model;
+    return '<div class="card">' +
+      '<div class="label-row"><div class="region-label"><span class="dot' + region + '"></span>' + s.address + '</div><span class="section-note">반경 ' + s.radius + 'm</span></div>' +
+      '<div style="font-size:12px;color:var(--gray-light);margin-bottom:14px;">' + m.districtType + '</div>' +
+      '<div class="metric-grid">' +
+        '<div><div class="metric-label">일 평균</div><div class="metric-value">' + m.totalDaily.toLocaleString() + '</div><div class="metric-unit">명</div></div>' +
+        '<div><div class="metric-label">피크</div><div class="metric-value">' + m.peakSlot + '</div><div class="metric-unit">시</div></div>' +
+        '<div><div class="metric-label">최다 연령</div><div class="metric-value">' + m.topAgeName + '</div><div class="metric-unit">' + m.topAgeRatio + '%</div></div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function renderIndustry() {
+  const el = document.getElementById('industryCards');
+  const anyLive = state.A || state.B;
+  document.getElementById('industryNote').textContent = anyLive ? '실제 공공데이터 (상가업소 정보)' : '실제 공공데이터';
+  el.innerHTML = ['A','B'].map(region => {
+    const s = state[region];
+    if (!s) return '<div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>';
+    const data = s.live.industryData.slice(0, 6);
+    const max = Math.max(...data.map(d => d.ratio), 1);
+    return '<div class="card">' +
+      '<div class="region-label" style="margin-bottom:14px;"><span class="dot' + region + '"></span>' + s.address + '</div>' +
+      data.map(d => (
+        '<div class="bar-row">' +
+          '<span class="bar-name">' + d.name + '</span>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + (d.ratio/max*100) + '%;background:' + COLORS[region] + '"></div></div>' +
+          '<span class="bar-count">' + d.ratio + '%</span>' +
+        '</div>'
+      )).join('') +
+      '<div style="font-size:11px;color:var(--gray-light);margin-top:8px;">반경 내 총 ' + s.live.totalStoreCount + '개 상가</div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderUnmanned() {
+  const el = document.getElementById('unmannedCards');
+  el.innerHTML = ['A','B'].map(region => {
+    const s = state[region];
+    if (!s) return '<div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>';
+    const types = s.live.unmannedTypes;
+    const total = s.live.unmannedTotal;
+    const sat = s.live.saturation;
+    return '<div class="card">' +
+      '<div class="label-row"><div class="region-label"><span class="dot' + region + '"></span>' + s.address + '</div>' +
+        '<span class="badge' + (sat === '높음' ? ' high' : '') + '">경쟁 포화도 ' + sat + '</span></div>' +
+      '<div style="font-size:12px;color:var(--gray-light);margin-bottom:14px;">반경 내 무인매장 ' + total + '개</div>' +
+      types.map((t, i) => (
+        '<div class="bar-row">' +
+          '<span class="bar-name' + (i===0?' star':'') + '">' + t.name + (i===0?' ★':'') + '</span>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + Math.min(100, (t.count/Math.max(1,total))*100*1.4) + '%;background:var(--ink);opacity:' + (i===0?1:0.4) + '"></div></div>' +
+          '<span class="bar-count">' + t.count + '</span>' +
+        '</div>'
+      )).join('') +
+      '<div style="font-size:11px;color:var(--gray-light);margin-top:8px;">★ 포토부스/무인사진관 — 직접 경쟁 업종</div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderRevenue() {
+  const el = document.getElementById('revenueCards');
+  el.innerHTML = ['A','B'].map(region => {
+    const s = state[region];
+    if (!s) return '<div class="card"><div style="color:var(--gray-light);font-size:13px;">-</div></div>';
+    const m = s.model;
+    return '<div class="card">' +
+      '<div class="label-row"><div class="region-label"><span class="dot' + region + '"></span>' + s.address + '</div><span class="section-note">' + s.pyeong + '평 기준</span></div>' +
+      '<div class="revenue-num">' + m.estMid.toLocaleString() + '만원</div>' +
+      '<div class="revenue-range">예상 범위 ' + m.estLow.toLocaleString() + '만~' + m.estHigh.toLocaleString() + '만원 / 월</div>' +
+      '</div>';
+  }).join('');
+}
+</script>
+
+</body>
+</html>
